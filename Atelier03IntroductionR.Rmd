@@ -26,17 +26,16 @@ lapply(extensions, require, character.only = TRUE)
 
 * Apprendre à manipuler des listes et des tableaux de données
 * Se familiariser avec les structures de contrôle et les fonctions d'itération
-* Apprendre à importer des textes depuis un dépôt en ligne
 
 ## Parties de l'atelier:
 
-* Manipulation des listes et des tableaux de données
+* Manipulation de listes et de tableaux de données
 * Les structures de contrôle `if`, `for` et `while`
-* Importation de textes du Projet Gutenberg avec l'extension GutenbergR
+* Manipulation libre d'un tableau formé de gazouillis
 
 ![](Atelier03IntroductionR.jpg)
 
-## Structures de données: liste, matrice, tableau
+## Structures de données: tableau
 
 ### Rappel: le vecteur
 Le vecteur est une structure à une seule dimension qui peut contenir un nombre quasi illimité d'éléments. Sa seule contrainte est de ne pouvoir accepter que des éléments du même type. Un vecteur doit être composé exclusivement de caractères, ou de nombres, ou de booléens (TRUE/FALSE).
@@ -50,7 +49,7 @@ Question de révision:
 ### Manipulation des listes
 La liste ressemble au vecteur en ceci qu'il s'agit d'une structure de données unidimensionnelle, dont la longueur pourra être obtenue avec la fonction `length()`, mais, contrairement au vecteur, elle peut contenir toutes sortes d'objets
 
-On a appris à manipuler les vecteur dans le premier atelier, mais on a laissé de côté celle des listes. Recréons cette courte liste du premier atelier comprenant trois vecteurs ayant chacun trois éléments.
+On a appris à manipuler les vecteur dans le premier atelier, mais on a laissé de côté celle des listes. Créons une courte liste comprenant trois vecteurs ayant chacun trois éléments.
 
 ```{r}
 mes_oeuvres_l <- list(auteurs = c("Mercier", "Stael", "Hugo", "Zola"),
@@ -59,18 +58,23 @@ mes_oeuvres_l <- list(auteurs = c("Mercier", "Stael", "Hugo", "Zola"),
 
 mes_oeuvres_l
 ```
+La liste acceptant des éléments de différentes classes et types, la création de la nôtre n'a pas entraîné la transformation de ses éléments
 
-Comme on a donné des noms à nos éléments, on peut utiliser l'opérateur `&` pour appeler le contenu de l'élément. L'élément ainsi extrait sera un vecteur et l'extraction de l'un de ses propres éléments se fait par indexation, nom ou booléen.
+```{r}
+str(mes_oeuvres_l)
+```
+
+#### Indexation des éléments d'une liste par nom
+En créant notre liste, on a attribué à chaque élément un nom avec l'opérateur `=`. On peut maintenant utiliser l'opérateur `$` pour appeler le contenu de l'élément. L'élément de la liste ainsi appelé sera un vecteur, ce qu'on peut vérifier en passant l'élément extrait à la fonction `str()`.
 
 ```{r extraction-liste-nom}
 mes_oeuvres_l$auteurs
 
 str(mes_oeuvres_l$auteurs)
 
-mes_oeuvres_l$auteurs[2]
-
 ```
 
+#### Indexation des éléments d'une liste par position
 L'indexation d'une liste peut également se faire en utilisant la position de l'élément (double crochets).
 
 ```{r extraction-liste-position-booleen}
@@ -81,7 +85,7 @@ mes_oeuvres_l[[1]][2] # Extraction du deuxième élément du premier vecteur de 
 ```
 
 
-Si je souhaite effectuer une opération sur chacun des éléments de la liste (pour autant que cela soit autorisé par le type de données qu'ils contiennent et par la fonction utilisée), je pourrais recourir à la fonction d'itération `lapply()`, qui prend au minimum deux arguments: `x`, soit une vecteur ou une liste sur lequel itérer, ainsi qu'une fonction qui sera appliquée à chaque membre de `x`. 
+Si je souhaite effectuer une opération sur chacun des éléments de la liste (pour autant que cela soit autorisé par le type de données qu'ils contiennent et par la fonction utilisée), je pourrais recourir à la fonction d'itération `lapply()`, qui prend au minimum deux arguments: `x`, soit un vecteur ou une liste, ainsi qu'une fonction qui sera appliquée à chaque élément de `x`. 
 
 ```{r}
 lapply(mes_oeuvres_l, class) # Notez que la fonction, ici, n'est pas suivie des apostrophes. Les arguments de la fonction enchâssée dans `lapply` seront mis simplement les uns à la suite des autres après le nom de la fonction et séparés par des virgules.
@@ -89,25 +93,24 @@ lapply(mes_oeuvres_l, class) # Notez que la fonction, ici, n'est pas suivie des 
 lapply(mes_oeuvres_l, paste, "*",  sep = "")
 ```
 
-
 ### Manipulation des tableaux de données
-Recréons un tableau de données à partir des éléments de la liste en mémoire.
+Créons maintenant un tableau de données à partir des éléments de la liste en mémoire. Chaque élément de la liste, trois vecteurs, seront assemblés à la verticale et deviendront les colonnes du tableau.
 
 ```{r creation-data-frame}
 (mes_oeuvres_df <- data.frame(mes_oeuvres_l))
 ```
 
-On se souvient que chaque colonne d'un tableau de données constitue un vecteur indépendant des autres et composé de données d'un seul type. On peut cependant manipuler ces différents vecteurs et même produire de nouvelles colonnes à l'aide de ces manipulations. Ajoutons tout d'abord une colonne (variable) `prenom` au tableau puis assemblons, dans une nouvelle colonne, les éléments de cette colonne et ceux de la colonne auteurs. Et tant qu'à faire, profitons-en pour modifier le nom de cette colonne actuellement appelée `auteurs`.
+Dans un ableau de données, chaque colonne constitue un vecteur indépendant des autres et composé de données **d'un seul type**. On peut cependant manipuler ces différents vecteurs et même produire de nouvelles colonnes à l'aide de ces manipulations. Ajoutons tout d'abord une colonne `prenom` au tableau puis assemblons, dans une nouvelle colonne, les éléments de cette colonne et ceux de la colonne auteurs. Et tant qu'à faire, profitons-en pour modifier le nom de cette colonne actuellement appelée `auteurs`.
 
 
 ```{r}
-mes_oeuvres_df$prenom <- c("Louis-Sébastien", "Germaine de", "Victor", "Émile")
+mes_oeuvres_df$prenom <- c("Louis-Sébastien", "Germaine de", "Victor", "Émile") # On crée ici une colonne appelée "prenom" et composée de quatre éléments.
 
-mes_oeuvres_df$nom_prenom <- paste(mes_oeuvres_df$auteurs, mes_oeuvres_df$prenom, sep = ", ")
+mes_oeuvres_df$nom_prenom <- paste(mes_oeuvres_df$auteurs, mes_oeuvres_df$prenom, sep = ", ") # On crée ici une colonne appelée "nom_prenom" et composée des valeurs de deux colonnes existantes.
 
-mes_oeuvres_df <- mes_oeuvres_df[, c(5,1,4,2,3)]
+mes_oeuvres_df <- mes_oeuvres_df[, c(5,1,4,2,3)] # Les nouvelles colonnes sont toujours placées à la droite du tableau, par défaut. On peut réordonner nos colonnes en fournissant un vecteur en position `j` dans les crochets d'indexation.
 
-names(mes_oeuvres_df)[names(mes_oeuvres_df)=="auteurs"] <- "nom"
+names(mes_oeuvres_df)[names(mes_oeuvres_df)=="auteurs"] <- "nom" # Ici, on indexe le nom de la colonne "auteurs" afin d'écraser précisément ce nom par un autre.
 
 ```
 
@@ -116,31 +119,37 @@ Toutes ces opérations pourraient se faire à la chaîne à l'aide de l'extensio
 ![](data-transformation (1)_Page_1.jpg)
 
 
-Ajoutons une nouvelle colonne à notre tableau, réordonnons l'ordre des colonnes et donnons de nouveaux noms à toutes.
+Ajoutons une nouvelle colonne à notre tableau, réordonnons l'ordre des colonnes et donnons de nouveaux noms à certaines d'entre elles.
 
 ```{r}
 mes_oeuvres_df <- mes_oeuvres_df %>%
   mutate(., abbreviation=paste(str_extract(prenom, pattern="[[:upper:]]"),
                                str_extract(nom, pattern="[[:upper:]]"), sep = " ")) %>%
-  select(nom, prenom, abbreviation, oeuvres, annees_pub) %>% rename(., patronyme=nom)
+  select(nom, prenom, abbreviation, oeuvres, annees_pub) %>%
+  rename(., patronyme=nom)
+
+# Trois opérations en chaîne:
+# 1. Création d'une nouvelle colonne avec la fonction `dplyr::mutate()`;
+# 2. On impose un nouvel ordre avec la fonction `dplyr::select()`;
+# 3. On donne un nouveau nom à la colonne `nom`.
 
 ```
 
 
 ## Les structures de contrôle
-La fonction dont nous avons exploré l'anatomie dans le premier atelier est un outil très utile pour effectuer des opérations sur les données et structures de données. Mais la fonction ne  révèle vraiment sa souplesse et sa puissance qu'intégrée à des structures conditionnelles. On peut par exemple exiger d'une fonction qu'elle ne fasse ce pour quoi elle a été créée que si une condition particulière est remplie, ou qu'elle s'applique à chacune des 100 000 lignes d'un tableau, ou encore qu'elle cesse de s'appliquer dès qu'une  condition donnée est satisfaite. 
+Il arrive qu'on ne souhaite appliquer une fonction ou une série d'opérations sur une variable ou un ensemble d'observations que si certaines conditions sont remplies, ou encore tant qu'un résultat ne sera pas obtenu, ou encore un nombre de fois prédéterminé. C'est alors qu'on a besoin des structures de contrôle.
 
 ### L'instruction if()
 
-Nous avons déjà croisé une telle syntaxe lorsqu'on souhaitait vérifier si certaines extensions étaient déjà installées dans nos dossiers R :
+Nous avons déjà croisé une telle syntaxe lorsqu'on souhaitait vérifier si certaines extensions étaient installées dans nos dossiers R :
 
 ```{r condition-if}
 if(!"ggplot2" %in% rownames(installed.packages())) {install.packages("ggplot2")}
 ```
 
-La ligne de code ci-dessus doit se lire ainsi: « si la condition indiquée dans la parenthèse suivant `if` n'est pas vraie, exécute la commande incluse dans les accolades. » `installed.packages()` est une matrice dont les noms de lignes correspondent aux extensions installées dans vos dossiers. Ainsi, la ligne de code ci-dessus indique à R que si la extension `ggplot2` *n'est pas* incluse dans les noms de lignes de la matrice appelée par la fonction `installed.packages()`, il devra installer cette extension. 
+La ligne de code ci-dessus doit se lire ainsi: « si la condition indiquée dans la parenthèse suivant `if` n'est pas vraie, exécute la commande insérée à la suite, dans les accolades. » `installed.packages()` est une matrice dont les noms de lignes correspondent aux extensions installées dans vos dossiers. Ainsi, la ligne de code ci-dessus indique à R que si l'extension `ggplot2` *n'est pas* incluse dans les noms de lignes de la matrice appelée par la fonction `installed.packages()`, il devra installer cette extension. 
 
-L'instruction `if()` appelle donc la vérification d'une assertion contenue dans une parenthèse et, selon le résultat du test, elle exécutera ou non la ou les commandes qui suivent. On pourrait par exemple utiliser `if()` dans la création d'une nouvelle variable dans un tableau de données. Pour le montrer, créons pour commencer un tableau très simple, que l’on affiche à l’aide de la fonction `kable()` de l'extension `knitr`:
+L'instruction `if()` appelle donc la vérification d'une assertion contenue dans une parenthèse et, selon le résultat du test, elle exécutera ou non la ou les commandes qui suivent. On pourrait par exemple utiliser `if()` dans la création d'une nouvelle variable dans un tableau de données. Pour le montrer, créons pour commencer un tableau très simple :
 
 
 ```{r}
@@ -166,7 +175,7 @@ if("Kamouraska" %in% auteures_quebecoises$oeuvre) {print("Oui, Kamouraska fait b
 
 Les choses se déroulent bien comme nous l'avions prévu: la condition de la première ligne de code étant remplie (l'exécution du code renvoie `TRUE`), R exécute la commande contenue dans les accolades qui suivent. La condition de la deuxième ligne de code n'étant pas satisfaite, R n'exécute pas la commande qui suit.
 
-Il serait bien entendu préférable de pouvoir ajouter une clause à notre test logique, et dire à R ce qu'il doit faire si la réponse au test est FALSE. On fait cela en utilisant l'instruction `else()`.
+Il serait bien entendu préférable de pouvoir ajouter une clause à notre test logique, et dire à R ce qu'il doit faire si la réponse au test est `FALSE`. On fait cela en utilisant l'instruction `else()`.
 
 ```{r warning=FALSE}
 if("Kamouraska" %in% auteures_quebecoises$oeuvre) {print("Oui, Kamouraska fait bien partie des oeuvres du tableau.")
@@ -177,23 +186,23 @@ if("Kamouraska" %in% auteures_quebecoises$oeuvre) {print("Oui, Kamouraska fait b
 
 Nous pourrions tirer parti de `if()` pour ajouter une auteure au tableau si, et seulement si cette auteure en est absente.
 
-> Note: dans le code ci-dessous, on utilise la fonction `list()` plutôt que `c()`. Si vous avez fait le premier atelier, vous vous souviendrez qu'un vecteur ne peut contenir qu'un seul type de données, tandis qu'une liste peut contenir des données hétérogènes. Si vous essayez de concaténer dans un vecteur des données textuelles (de type `character()`) et des données numériques (de types `double()` ou `integer()`), R vous renverra une erreur.
+> Note: dans le code ci-dessous, on utilise la fonction `list()` plutôt que `c()`. Si vous avez fait le premier atelier, vous vous souviendrez qu'un vecteur ne peut contenir qu'un seul type de données, tandis qu'une liste peut contenir des données hétérogènes. Si vous essayez de concaténer dans un vecteur des données textuelles (de type `character()`) et des données numériques (de types `double()` ou `integer()`), R transformera toutes les valeurs en chaîne de caractères.
 
 ```{r warning=FALSE}
 if(!"Nelly Arcan" %in% auteures_quebecoises$nom) {
   auteures_quebecoises <- rbind(auteures_quebecoises, list("Nelly Arcan", "Putain", 2001L, "roman")) 
 }
-knitr::kable(auteures_quebecoises)
+auteures_quebecoises
 ```
 
 Et si cette auteure figure déjà dans le tableau, mais que nous souhaitions ajouter un autre de ses titres?
 
 ```{r}
-if(!"Nelly Arcan" %in% auteures_quebecoises$nom) {             # Condition
-  print("Non, Nelly Arcan ne figure pas dans le tableau.")      # Si condition remplie, exécute la commande
-} else if (!"Folle" %in% auteures_quebecoises$oeuvre){         # Vérifie également si "Folle" figure dans les titres
-  auteures_quebecoises <- rbind(auteures_quebecoises, list("Nelly Arcan", "Folle", 2004L, "roman"))     # Dans le cas contraire, ajoute-le
-  print("Le roman Folle fait maintenant partie du tableau.")    # Puis (autre commande) imprime la chaîne de caractères suivante   
+if(!"Nelly Arcan" %in% auteures_quebecoises$nom) {             
+  print("Non, Nelly Arcan ne figure pas dans le tableau.")      
+} else if (!"Folle" %in% auteures_quebecoises$oeuvre){         
+  auteures_quebecoises <- rbind(auteures_quebecoises, list("Nelly Arcan", "Folle", 2004L, "roman"))     
+  print("Le roman Folle fait maintenant partie du tableau.")    
 }
 ```
 
@@ -214,7 +223,7 @@ if(auteures_quebecoises$annee[1] >= 1950) {
 } else {
   print("Le tableau comporte déjà une auteure et une oeuvres antérieures à 1950.")
 }
-knitr::kable(auteures_quebecoises <- auteures_quebecoises[order(auteures_quebecoises$annee),])
+(auteures_quebecoises <- auteures_quebecoises[order(auteures_quebecoises$annee),])
 ```
 
 Si nous exécutons à nouveau la même structure conditionnelle, la déclaration de la parenthèse s'avèrera fausse, puisqu'une entrée vient d'être créée pour la période des origines à 1950. Dès lors, c'est la commande suivant l'instruction `else` qui le sera. 
@@ -246,10 +255,10 @@ if(auteures_quebecoises$annee > 1999) {
 } else {
   auteures_quebecoises$periode <- "XVIIIe siècle"
 }
-knitr::kable(auteures_quebecoises)
+(auteures_quebecoises)
 ```
 
-Que s'est-il passé? Sans doute pas ce que nous espérions! R a vérifié la première assertion de la structure conditionnelle et a conclu qu'elle était fausse; il est donc passé à la suivante, et ainsi de suite jusqu'à ce qu'il trouve une assertion vraie ou une commande `else`. Il a dès lors appliqué au nouveau vecteur formant la colonne *periode* la même commande. Comme on le devine, cela n'est pas très utile. Ce qu'il faut, c'est que chaque observation ou ligne fasse l'objet d'une évaluation indépendante et que le résultat de la structure conditionnelle soit renvoyé comme valeur du nouveau vecteur *periode*. Il y a au moins deux manières de faire cela sans recourir à des extensions spécialisées dans la manipulation de données comme `dplyr`. La première consiste à utiliser une boucle de type `for`.
+Que s'est-il passé? Sans doute pas ce que nous espérions! R a vérifié la première assertion de la structure conditionnelle et a conclu qu'elle était fausse; il est donc passé à la suivante, et ainsi de suite jusqu'à ce qu'il trouve une assertion vraie ou une commande `else`. Il a dès lors appliqué au nouveau vecteur formant la colonne *periode* la même commande. Comme on le devine, cela n'est pas très utile. Ce qu'il faut, c'est que chaque observation de la variable `annee` fasse l'objet d'une évaluation indépendante et que le résultat de la structure conditionnelle soit renvoyé comme valeur du nouveau vecteur *periode*. Il y a au moins deux manières de faire cela sans recourir à des extensions spécialisées dans la manipulation de données comme `dplyr`. La première consiste à utiliser une boucle de type `for`.
 
 ### Boucle `for`
 La boucle `for` permet de répéter une opération un nombre de fois déterminé d'emblée. La structure de la boucle se présente comme suit: `for([nombre d'itérations]) {[commande(s)]}`.Si l'on connait d'avance le nombre de lignes d'un tableau et qu'on souhaite répéter une commande à chaque ligne, on peut fournir ce nombre dans la parenthèse et indiquer la commande entre les accolades. Cependant, le propre de la manipulation de données étant précisément la modification des jeux de données, on gagnera à laisser R compter lui-même le nombre de lignes (ou la longueur d'un vecteur, comme on le verra un peu plus loin) et indiquer le nombre d'itérations nécessaires pour passer à travers l'ensemble de la structure. On peut faire cela avec la fonction `nrow()`, que nous avons déjà vue. Utilisons cette fonction dans la parenthèse de la boucle, puis réinsérons notre instruction `if` composée ci-dessus. Les ajouts au code seront expliqués ci-dessous.
@@ -266,7 +275,7 @@ for(i in 1:nrow(auteures_quebecoises)) {
   auteures_quebecoises$periode[i] <- "XVIIIe siècle"
   }
 }
-knitr::kable(auteures_quebecoises)
+(auteures_quebecoises)
 ```
 
 Cette fois, notre instruction `if` a bel et bien été appliquée telle que nous le souhaitions. La parenthèse suivant `for` pourra paraitre absconse à première vue, mais sa composition est très simple. On donne d'abord à `for` un nom de variable quelconque. Par convention, on utilise la lettre *i* (largement utilisée dans les formules mathématiques pour indiquer la première dimension d'un objet). On aurait pu inscrire, en lieu et place, la chaine de caractères `chaque_ligne_du_tableau`; seulement, comme il faut réutiliser cette variable dans chacune des instructions du corps de la boucle, une telle chaine alourdirait la syntaxe. Nous indiquons donc à R que pour chaque ligne `i`, de la première jusqu'à la dernière — et on lui laisse le soin de trouver lui-même quelle ligne est la dernière du tableau —, nous souhaitons qu'il exécute les commandes insérées entre les accolades et formant le corps de la boucle. Nous lui indiquons ensuite, dans chacune des commandes de ce corps, l'élément précis sur lequel il doit appliquer la ou les fonctions. 
@@ -286,18 +295,18 @@ auteures_quebecoises$annee[i]
 Ce que nous fournissons à `for` dans la parenthèse qui suit immédiatement la commande, dans le bloc de code précédent, ce sont des précisions sur les éléments qui font l'objet de l'itération. Ce que nous lui fournissons ensuite, dans le corps de la boucle, ce sont les commandes à exécuter avec chaque élément `i` d'un vecteur ou d'une liste.
 
 ### Boucle `while`
-Les boucles `while` ont la même structure que les boucles `for`, mais au lieu d'exécuter une commande un nombre de fois déterminé d'emblée, elles les exécutent tant et aussi longtemps qu'une certaine condition n'est pas remplie. Cette caractéristique les rend à la fois plus souples et plus dangereuses. Plus souple, parce qu'on n'est pas forcé de lui fournir un nombre prédéterminé d'itérations. Plus dangereuses, parce que si cette condition, pour quelque raison que ce soit, n'est pas remplie, la boucle se poursuit indéfiniment et il faudra y mettre un terme en utilisant un levier externe (fermeture forcée du logiciel, etc.). Ce type de structure a un intérêt particulier dans un programme interactif où une réponse donnée à une question peut entrainer l'exécution automatique d'une commande. Supposons par exemple qu'on souhaite inviter les internautes à ajouter des notices à notre tableau des auteures québécoises. On pourrait demander à nos internautes imaginaires de répondre à une série de questions correspondant aux valeurs du tableau, emmagasiner ces valeurs dans des vecteurs, les assembler dans une liste, puis joindre celle-ci à notre tableau. Les questions apparaitront dans la console lorsque vous exécuterez le code ci-dessous.
+Les boucles `while` ont la même structure que les boucles `for`, mais au lieu d'exécuter une commande un nombre de fois déterminé d'emblée, elles les exécutent tant et aussi longtemps qu'une certaine condition n'est pas remplie. Cette caractéristique les rend à la fois plus souples et plus dangereuses. Plus souple, parce qu'on n'est pas forcé de lui fournir un nombre prédéterminé d'itérations. Plus dangereuses, parce que si cette condition, pour quelque raison que ce soit, n'est pas remplie, la boucle se poursuit indéfiniment et il faudra y mettre un terme en utilisant un levier externe (fermeture forcée du logiciel, etc.). Ce type de structure a un intérêt particulier dans un programme interactif où une réponse donnée à une question peut entrainer l'exécution automatique d'une commande. Supposons par exemple qu'on souhaite inviter un utilisateur à ajouter des notices à notre tableau des auteures québécoises. On pourrait demander à cet utilisateur imaginaire de répondre à une série de questions correspondant aux valeurs du tableau, emmagasiner ces valeurs dans des vecteurs, les assembler dans une liste, puis joindre celle-ci à notre tableau. Les questions apparaitront dans la console lorsque vous exécuterez le code ci-dessous.
 
 ```{r ajout-interactif}
 # Préparez-vous à ajouter des notices à notre tableau!
 reponse <- tolower(readline(prompt = "Souhaites-tu ajouter une notice au tableau des auteures québécoises? (oui/non) "))
 if(reponse == tolower("oui")) {
   while(!reponse == tolower("non")){     
-  auteure_temp <- readline(prompt = "Écris le nom d'une auteure: ")
-  oeuvre_temp <- readline(prompt = "Donne le titre de l'une de ses oeuvres: ")
-  annee_temp <- readline(prompt = "Indique l'année de publication de cette oeuvre:  ")
-  genre_temp <- readline(prompt = "Précise le genre de cette oeuvre:  ")
-  periode_temp <- readline(prompt = "Fournis la période de cette oeuvre (exemple: 'XXIe siècle'):  ")
+  auteure_temp <- readline(prompt = "Écris le nom d'une auteure (ex.: Elisabeth Bégon):  ")
+  oeuvre_temp <- readline(prompt = "Donne le titre de l'une de ses oeuvres (ex.: Lettres au cher fils): ")
+  annee_temp <- readline(prompt = "Indique l'année de publication de cette oeuvre (ex.: 1748):  ")
+  genre_temp <- readline(prompt = "Précise le genre de cette oeuvre (ex.: lettres):  ")
+  periode_temp <- readline(prompt = "Fournis la période de cette oeuvre (exemple: (XXIe siècle):  ")
   une_notice <- list(auteure_temp, oeuvre_temp,
                      annee_temp, genre_temp,
                      periode_temp)   # les différentes réponses sont rassemblées dans une liste
@@ -308,8 +317,8 @@ if(reponse == tolower("oui")) {
   print("Merci tout de même d'avoir bien voulu répondre à cette question!")
 }
 
-auteures_quebecoises <- auteures_quebecoises[order(auteures_quebecoises$annee),]
-knitr::kable(auteures_quebecoises)
+auteures_quebecoises <- auteures_quebecoises[order(auteures_quebecoises$annee, decreasing = TRUE),]
+(auteures_quebecoises)
 ```
 
 On notera que, dans le code ci-dessus, les deux dernières commandes sont extérieures à la boucle, ce qui veut dire qu'elles ne sont exécutées qu'au terme des itérations, après la fermeture de la boucle.
@@ -322,14 +331,13 @@ La fonction de base ifelse est à la fois très simple et très pratique. Elle c
 
 ```{r}
 for(i in 1 : nrow(auteures_quebecoises)){
-  auteures_quebecoises$type[i] <- ifelse(test = auteures_quebecoises$genre[i] %in% c("lettres", "roman", "essai"),
-                                         yes = "prose",
-                                         no = "vers")
+  auteures_quebecoises$type[i] <- ifelse(test = auteures_quebecoises$genre[i] == "poésie",
+                                         yes = "vers",
+                                         no ="prose")
 }
 
-knitr::kable(auteures_quebecoises <- auteures_quebecoises[,c(1,2,3,5,4,6)]) # On réordonne ici les colonnes pour une présentation plus adéquate
+(auteures_quebecoises <- auteures_quebecoises[,c(1,2,3,5,4,6)]) # On réordonne ici les colonnes pour une présentation plus adéquate
 
-# saveRDS(auteures_quebecoises, "donnees/auteures_quebecoises.RDS") # sauvegarde de cette table pour des ateliers ultérieurs
 ```
 
 
@@ -343,6 +351,8 @@ library(dplyr)
 library(jsonlite)
 library(httr)
 library(rtweet)
+# install.packages("twitteR")
+library(twitteR)
 library(tidyverse)
 library(tidytext)
 library(lsa)
@@ -352,21 +362,21 @@ library(lsa)
 # consumer_secret <- "7HhZXuTC8MQh9kAtbkIo1pKQd2Ol0AYXqp2COTsjqTcFKG8408"
 # access_token="281051869-9cJqNBYIYVhyvls73ZBvkfhIYGlL18QgxO5g78fJ"
 # access_secret="xHPzQhxzZSqSCtC4ee7kn3IWTAZwXaKhfdv4Zurs542po"
-# 
-# setup_twitter_oauth(consumer_key, consumer_secret, access_token, access_secret)
-# 
-# litt_twitter <- search_tweets("#Litterature", n=18000, lang = "fr", include_rts = FALSE, type = "mixed")
 
-# users_data(litt_twitter)
-# 
-# colnames(litt_twitter)
-# 
-# litt_twitter_reduit <- litt_twitter %>% select(created_at, screen_name, text, source, retweet_count,
-#                                         reply_count, hashtags, media_type, place_name, place_type,
-#                                         country, country_code, geo_coords, coords_coords, location,
-#                                         description, followers_count, friends_count, account_created_at)
-# 
-# table(litt_twitter_reduit$country_code)
+# setup_twitter_oauth(consumer_key, consumer_secret, access_token, access_secret)
+
+litt_twitter <- search_tweets("#Littérature", n=1000, lang = "fr", include_rts = FALSE, type = "mixed")
+
+users_data(litt_twitter)
+
+colnames(litt_twitter)
+ 
+litt_twitter_reduit <- litt_twitter %>% select(created_at, screen_name, text, source, retweet_count,
+                                        reply_count, hashtags, media_type, place_name, place_type,
+                                        country, country_code, geo_coords, coords_coords, location,
+                                        description, followers_count, friends_count, account_created_at)
+
+table(litt_twitter_reduit$country_code)
 
 
 # 
