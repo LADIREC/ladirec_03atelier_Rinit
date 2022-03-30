@@ -306,16 +306,51 @@ tableau_synthese <- tibble(titre = unique(RachildeLivres$title),
 
 ## Manipulation des documents importés
 
-```{r}
+Ajoutons deux nouvelles colonnes à notre tableau.
+```{r enrichissement-des-donnees}
 # On crée maintenant deux nouvelles variables.
 
 tableau_synthese <- tableau_synthese %>% mutate(nbre_mots = str_count(texte, pattern = "[[:alpha:]]+"),
                                                 nbre_phrases = str_count(texte, pattern = "\\w+[.?!]"))
 
 str(tableau_synthese)
-
 ```
 
-## Exercice
 
-[...]
+Et transposons le résultat en deux différents graphiques.
+```{r visualisation}
+# Et un simple tableau pour visualiser le résultat
+library(tidyr)
+library(reshape2)
+dodge <- position_dodge(width = 0.9)
+ggplot(tableau_synthese[, c(1,3:4)], aes(x = reorder(titre, nbre_mots), y = nbre_phrases, size = nbre_mots)) +
+  geom_point(stat = "identity")+
+  xlab("Titres")+
+  ylab("Nombre de phrases")
+
+
+ggplot(melt(tableau_synthese[, c(1,3:4)], id.vars="titre"), aes(x=reorder(titre, value), y=value, fill= variable))+
+  geom_bar(stat="identity")+
+  facet_wrap(~ variable,scales = "free_x")+
+  xlab("Titres")+
+  ylab("Valeur")+
+  coord_flip()
+```
+
+
+
+## Supplément: l'annotation automatique
+
+```{r}
+# library(udpipe)
+# library(data.table)
+# 
+# model <- udpipe::udpipe_download_model(language = "french-gsd")
+# model_gsd <- udpipe_load_model("french-gsd-ud-2.5-191206.udpipe")
+# 
+# RachildeAnnotee <- udpipe::udpipe_annotate(model_gsd,
+#                                            tableau_synthese$texte,
+#                                            doc_id = tableau_synthese$titre) %>% 
+#   as.data.table()
+```
+
