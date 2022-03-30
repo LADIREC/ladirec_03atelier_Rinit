@@ -308,16 +308,13 @@ tableau_synthese <- tibble(titre = unique(RachildeLivres$title),
 ```{r}
 # On crée maintenant deux nouvelles variables.
 
-# Opérations sur la variable `texte` 
-# Test regex
-
-# my_sentence <- "Je vais aller manger. Pourquoi pas? c'est que j'ai faim! Et alors, qu'est-ce que ça donne? Ça donne que j'ai faim en sapristi."
-# 
-# str_count(my_sentence, pattern = "\\w+[.?!]")
-
 tableau_synthese <- tableau_synthese %>% mutate(nbre_mots = str_count(texte, pattern = "[[:alpha:]]+"),
                                                 nbre_phrases = str_count(texte, pattern = "\\w+[.?!]"))
 
 str(tableau_synthese)
+
 ```
 
+## Exercice
+
+[...]
