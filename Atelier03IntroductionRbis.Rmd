@@ -10,11 +10,11 @@ output:
 knit: (function(inputFile, encoding) {
   rmarkdown::render(inputFile,
                     encoding = encoding,
-                    output_dir = "~/Downloads")})
+                    output_dir = "/cloud/project")})
 ---
 
 ```{r parametres, include=FALSE, message=FALSE, warning=FALSE}
-setwd("~/Downloads")
+setwd("/cloud/project")
 if(!"gutenbergr" %in% rownames(installed.packages())) {install.packages("gutenbergr")}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 extensions = c("knitr", "ggplot2","rmdformats", "dplyr", "stringr", "gutenbergr", "reshape2")
