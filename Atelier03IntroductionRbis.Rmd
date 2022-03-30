@@ -17,7 +17,7 @@ knit: (function(inputFile, encoding) {
 setwd("~/Downloads")
 if(!"gutenbergr" %in% rownames(installed.packages())) {install.packages("gutenbergr")}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
-extensions = c("ggplot2","rmdformats", "dplyr", "stringr", "gutenbergr", "reshape2")
+extensions = c("knitr", "ggplot2","rmdformats", "dplyr", "stringr", "gutenbergr", "reshape2")
 lapply(extensions, require, character.only = TRUE)
 ```
 
@@ -35,15 +35,15 @@ Le vecteur est une structure à une seule dimension qui peut contenir un nombre 
 
 Question de révision:
 
-- Que fera R si on essaye de concatéger un nombre entier et un nombre avec fractions? Un nombre avec fraction et une chaîne de caractères?
-- Comment est-ce que je peux extraire le quatrième élément d'un vecteur?
-- Comment est-ce que je peux remplacer un élément par un autre dans un vecteur?
-- Comment puis-je attribuer des noms aux éléments d'un vecteur?
+- Que fera R si on essaye de concaténer un nombre entier et un nombre avec fractions? Un nombre avec fraction et une chaîne de caractères?
+- Comment peut-on extraire le quatrième élément d'un vecteur?
+- Comment peut-on remplacer un élément par un autre dans un vecteur?
+- Comment attribuer des noms aux éléments d'un vecteur?
 
 ### Qu'est-ce qu'un tableau de données
 Le tableau de données, ou `data.frame` en R, est sans doute la structure la plus utilisée dans l'analyse des données. Il permet d'assembler en une seule table une série de vecteurs. Chaque colonne est ainsi composée d'un et d'un seul type de données, mais deux colonnes ou plus peuvent être de différents types. Le tableau de données partage avec la liste la capacité d'assembler des données hétérogènes, mais contrairement à la liste, le tableau de données les assemble en utilisant une deuxième dimension (les lignes ou observations).
 
-Le tableau de données peut être créé avec la fonction `data.frame()`, auquel on fournit un nombre donné de vecteurs. On peut reprendre les noms d'écrivains, les titres d'oeuvres et les dates de publication utilisées ci-dessus, après avoir fait un brin de ménage dans notre environnement de travail.
+Le tableau de données peut être créé avec la fonction `data.frame()`, auquel on fournit un nombre donné de vecteurs de même longueur.
 
 ```{r}
 mes_oeuvres_df <- data.frame(nom = c("Anne Hébert",
@@ -71,35 +71,53 @@ L'indexation des valeurs du tableau de données peut se faire, comme dans le cas
 *À noter* Dans R, l'indexation commence à 1 et non à 0, comme dans plusieurs autres langages.
 
 ```{r}
-mes_oeuvres_df[1,2] # Indexation d'une valeur unique
+mes_oeuvres_df[1,2] # Indexation d'une valeur unique; équivalent d'une cellule de la table.
 
-mes_oeuvres_df[c(1:3),4] # Indexation de trois observations tirées de la variable en position 4
+mes_oeuvres_df[c(1:3),4] # Indexation de trois observations tirées de la variable en colonne 4.
 
-mes_oeuvres_df[median(nrow(mes_oeuvres_df)), 1] # Indexation de la valeur de la première colonne de correspondant à l'observation en position médiane du tableau
+mes_oeuvres_df[median(nrow(mes_oeuvres_df)), 1] # Indexation de la valeur de la première colonne correspondant à l'observation en position médiane du tableau.
 
 mes_oeuvres_df[, ncol(mes_oeuvres_df)] # Extraction des valeurs de la dernière colonne du tableau
 ```
 
 #### L'indexation par nom
-Dans un tableau de données en R-base, chaque colonne et chaque ligne se voient attribuer un nom par défaut si cela n'a pas été fait manuellement.
+Dans un tableau de données en R-base, chaque colonne et chaque ligne se voient attribuer un nom par défaut si cela n'a pas été fait manuellement. Créaons à nouveau le tableau de données initial sans attribuer de nom aux colonnes.
 
 ```{r}
-test <- data.frame(1:10, letters[1:10])
-colnames(test)
-rownames(test)
+mes_oeuvres_df <- data.frame(c("Anne Hébert",
+                              "Nicole Brossard",
+                              "Joséphine Bacon",
+                              "Martine Delvaux"),
+                      c("Le tombeau des rois",
+                                 "Le désert mauve",
+                                 "Un thé dans la toundra",
+                                 "Les filles en série"),
+                      c(1953L, 1993L, 2013L, 2016L),
+                      c("poésie", "roman", "poésie", "essai"),
+                      c(FALSE, TRUE, FALSE, TRUE))
 
-str(test)
+mes_oeuvres_df
 ```
 
-On peut définir ces noms très aisément, par assignation.
+R composera par défaut des noms de colonnes en utilisant les valeurs du vecteur. Cela est assurément un problème, mais il est aisé de redéfinir ces noms par assignation.
 
 ```{r}
-(rownames(test) <- sample(x = c(10:100), size = nrow(test), replace = FALSE))
-# Arguments de la fonction `sample()`: x = valeur de l'échantillon; size = nombre d'individus; replace = si TRUE, reprise possible des mêmes individus.
 
-(colnames(test) <- c("nos", "lettres"))
+(colnames(mes_oeuvres_df) <- c("nom", "oeuvre", "annee", "genre", "prose"))
+
+mes_oeuvres_df
 
 ```
+
+Le même principe s'applique pour la création de noms de lignes.
+
+```{r}
+rownames(mes_oeuvres_df) # actuels noms de lignes
+
+rownames(mes_oeuvres_df) <- paste(mes_oeuvres_df$annee, gsub("\\s", "_", mes_oeuvres_df$oeuvre), sep = "_")
+
+```
+
 
 Il y a un grand avantage à avoir des noms de lignes. Ce sont des identifiants uniques qui seront par défaut exclus des calculs ou des opérations qui seront faites sur les valeurs des colonnes. Vous le verrez à l'usage.
 
@@ -107,10 +125,10 @@ L'indexation des observations et des variables peut se faire en utilisant les no
 
 ```{r indexation-tableu-nom}
 
-mes_oeuvres_df["2",] # Indexation de la ligne "2"
+mes_oeuvres_df["2013_Un_thé_dans_la_toundra",] # Indexation de la ligne "2"
 mes_oeuvres_df[, "nom"] # Indexation de la colonne "nom"
 
-mes_oeuvres_df["4", "annee"] # indexation de la valeur `i`, `j` au croisement de la ligne "4" et de la colonne "annee"
+mes_oeuvres_df["1993_Le_désert_mauve", "annee"] # indexation de la valeur `i`, `j` au croisement de la ligne "4" et de la colonne "annee"
 
 ```
 
@@ -122,7 +140,7 @@ mes_oeuvres_df$oeuvre[2]
 
 mes_oeuvres_df$nom[1:3]
 
-mes_oeuvres_df$naissance_auteur[c(1, 3:5)]
+mes_oeuvres_df$annee[c(1, 3:5)]
 
 ```
 
@@ -140,8 +158,9 @@ Enfin, l'ajout d'une nouvelle colonne repose sur le même principe:
 mes_oeuvres_df$initiales_auteur <- c("AH","NB", "JB", "MD")
 
 mes_oeuvres_df <- mes_oeuvres_df[, c(1, 6, 2:5)] # Repositionnement de cette colonne dans le tableau
-```
 
+mes_oeuvres_df
+```
 
 ## Comment importer des documents depuis le Projet Gutenberg?
 Dans l'exercice qui suit, nous allons utiliser les notions vues antérieurement pour composer un tableau de données à partir de trois romans importés depuis le Projet Gutenberg.
@@ -156,7 +175,7 @@ Les données importées dans R depuis le Projet Gutenberg se présentent sous la
 # On définit d'abord le site miroir de Projet Gutenberg depuis lequel nous allons importer les documents.
 mon_miroir <- "http://mirrors.xmission.com/gutenberg/"
 
-# La fonction `gutenberg_works()` de l'extention `gutenbergr` permet d'obtenir la liste des ouvrages disponibles.
+# La fonction `gutenberg_works()` de l'extention `gutenbergr` permet d'obtenir un tableau contenant les ouvrages disponibles.
 ouvragesFrancais <- gutenberg_works(languages = "fr")
 
 # Combien y a-t-il d'auteurs uniques de langue française dans le PG?
@@ -196,6 +215,7 @@ str(tableau_synthese)
 Ajoutons deux nouvelles colonnes à notre tableau.
 ```{r enrichissement-des-donnees}
 # On crée maintenant deux nouvelles variables. On se sert de l'extension `stringr` introduite lors du premier atelier.
+library(stringr)
 
 tableau_synthese$nbre_mots <- str_count(tableau_synthese$texte, pattern = "[[:alpha:]]+")
 tableau_synthese$nbre_phrases <- str_count(tableau_synthese$texte, pattern = "\\w+[.?!]")
@@ -206,6 +226,8 @@ str(tableau_synthese)
 
 Et transposons le résultat en deux différents graphiques.
 ```{r visualisation}
+library(reshape2)
+library(ggplot2)
 # Et un simple tableau pour visualiser le résultat
 tableau_pour_graphique <- tableau_synthese[, c(1,3:4)] # La colonne de texte n'est pas utile pour la construction du graphique
 
