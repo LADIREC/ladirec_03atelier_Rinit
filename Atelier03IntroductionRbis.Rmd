@@ -273,7 +273,8 @@ mon_miroir <- "http://mirrors.xmission.com/gutenberg/"
 # La fonction `gutenberg_works()` de l'extention `gutenbergr` permet d'obtenir la liste des ouvrages disponibles.
 ouvragesFrancais <- gutenberg_works(languages = "fr")
 
-# auteurs_uniques <- unique(ouvragesFrancais$author)
+# Combien d'auteurs uniques de langue française dans le PG?
+auteurs_uniques <- unique(ouvragesFrancais$author)
 
 # On filtre les ouvrages français contenant, dans la colonne `author`, la chaîne de caractères "Rachilde", et on en extrait les identifiants uniques des romans de Rachilde offerts par le PG.
 Rachilde_id <- ouvragesFrancais %>% filter(str_detect(author, "Rachilde")) %>% pull(gutenberg_id)
@@ -286,7 +287,7 @@ str(RachildeLivres)
 # Combien de lignes pour chaque roman?
 table(RachildeLivres$title)
 
-# Séparation des trois romans (Monsieur Vénus va demander une conversion de l'encodage)
+# Séparation des trois romans (Monsieur Vénus va demander une conversion de l'encodage, le document original ayant été encodé à la base en Latin1. Il faut demander sa conversion en UTF-8.)
 monsieurVenus <- RachildeLivres[RachildeLivres$title == "Monsieur Vénus", 2]
 monsieurVenus$text <- iconv(monsieurVenus$text, from = "Latin1", to="UTF-8")
 demonAbsurde <- RachildeLivres[RachildeLivres$title == "Le Démon de l'Absurde", 2]
