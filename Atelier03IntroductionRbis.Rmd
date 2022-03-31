@@ -16,9 +16,12 @@ knit: (function(inputFile, encoding) {
 ```{r parametres, include=FALSE, message=FALSE, warning=FALSE}
 setwd("/cloud/project")
 if(!"gutenbergr" %in% rownames(installed.packages())) {install.packages("gutenbergr")}
+if(!"trelliscopejs" %in% rownames(installed.packages())) {install.packages("trelliscopejs")}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
-extensions = c("knitr", "ggplot2","rmdformats", "dplyr", "stringr", "gutenbergr", "reshape2")
+extensions = c("knitr", "ggplot2","rmdformats", "dplyr", "stringr", "gutenbergr", "reshape2",
+               "plotly", "trelliscopejs")
 lapply(extensions, require, character.only = TRUE)
+rm(extensions)
 ```
 
 
@@ -200,55 +203,127 @@ demonAbsurde <- RachildeLivres[RachildeLivres$title == "Le Démon de l'Absurde",
 marquiseSade <- RachildeLivres[RachildeLivres$title == "La Marquise de Sade", 2]
 
 # Assemblage des romans respectifs en trois vecteurs
-monsieurVenus_v <- paste(monsieurVenus$text, collapse = " ")
+
 demonAbsurde_v <- paste(demonAbsurde$text, collapse = " ")
+monsieurVenus_v <- paste(monsieurVenus$text, collapse = " ")
 marquiseSade_v <- paste(marquiseSade$text, collapse = " ")
 
 # On combine les trois romans dans une table.
-tableau_synthese <- data.frame(titre = unique(RachildeLivres$title),
-                           texte = c(monsieurVenus_v,demonAbsurde_v, marquiseSade_v))
+tableau_synthese <- data.frame(auteur = "Rachilde",
+                               titre = c("Le Démon de l'Absurde", "Monsieur Vénus", "La Marquise de Sade"),
+                               texte = c(demonAbsurde_v, monsieurVenus_v, marquiseSade_v))
 
 str(tableau_synthese)
+
+# Ajoutons un livre d'une autre auteure et d'un autre genre. Cela rendra l'exploration des données plus intéressantes. Nous allons importer un essai de l'écrivaine Louise Colet (1810-1876).
+
+Colet_id <- ouvragesFrancais[grep(pattern = "Colet\\b", x=ouvragesFrancais$author),1]
+ColetLivres <- gutenberg_download(Colet_id$gutenberg_id, mirror = mon_miroir, meta_fields = "title")
+unique(ColetLivres$title)
+str(ColetLivres)
+
+# On voit que l'encodage doit du texte doit à nouveau être transformé
+enfancesCelebres <- ColetLivres[, 2]
+enfancesCelebres$text <- iconv(enfancesCelebres$text, from = "Latin1", to="UTF-8")
+enfancesCelebres_v <- paste(enfancesCelebres$text, collapse = " ")
+
+# Enchâssons le texte de Louise Colet dans une structure identique à celle de notre tableau synthèse
+enfancesCelebres_df <- data.frame(auteur = "Louise Colet",
+                                  titre = "Enfances célèbres",
+                                  texte = enfancesCelebres_v)
+
+str(enfancesCelebres_df)
+
+# Et assemblons les deux tableaux avec la fonction de base `rbind` (pour "row bind" ==> coller les lignes)
+tableau_synthese <- rbind(tableau_synthese, enfancesCelebres_df)
+
+str(tableau_synthese)
+
+# Nettoyage de l'environnement de travail.
+rm(list=setdiff(ls(),c("tableau_synthese" )))
+
+# La fonction `gc()` permet de nettoyer la mémoire.
+gc()
 ```
 
 ## Manipulation des documents importés
 
-Ajoutons deux nouvelles colonnes à notre tableau.
-```{r enrichissement-des-donnees}
-# On crée maintenant deux nouvelles variables. On se sert de l'extension `stringr` introduite lors du premier atelier.
-library(stringr)
+Pour rendre la manipulation des données du tableau plus amusante, nous allons y ajouter quatre nouvelles colonnes. Trois d'entre elles contiendront des données numériques et la dernière sera de type catégoriel.
 
-tableau_synthese$nbre_mots <- str_count(tableau_synthese$texte, pattern = "[[:alpha:]]+")
+La première colonne à ajouter indiquera, pour chaque roman, le nombre de caractères (y compris le nombre d'espaces); la deuxième, le nombre de mots; la troisième, le nombre de phrases; la quatrième, le genre de l'ouvrage (roman/essai). Les données catégorielles demanderaient un développement en soit. Disons pour aller vite que ce sont des données qui se présentent au programmeur comme des chaînes de caractères, mais R les appréhende sous la forme de nombres entiers. On donne cette structure à la données lorsque sa variété est limitée et répétitive. La fonction utilisée pour créer un tel type de données est `factor()` et la transformation de chaînes de caractères en données catégorielles passe par la fonction `as.factor()`. On verra ci-dessous, une fois les données créées, l'implication de cette transformation.
+
+Pour créer les trois premières colonnes, nous allons recourir l'extension `stringr` et à sa fonction `str_count()`. La même opération peut être faite en utilisant les fonctions de base de R (voir ci-dessous), mais comme il en faut pas moins de quatre pour arriver au même résultat, et qu'il faudrait avoir expliqué les structures de contrôle pour bien comprendre l'opération, nous allons prendre le raccourci appelé `stringr`!
+
+La fonction `str_count()` fonctionne avec des motifs argument `pattern`) et nous allons donc pouvoir utiliser des expressions régulières pour calculer le nombre de caractères, le nombre de mots et le nombre de phrases.
+
+Les expressions régulières utilisées sont les suivantes:
+`.`                 ==>  tout(lettre, chiffre, ponctuation, espace), une seule fois;
+`[:alpha:]`         ==>  toute lettre, une seule fois;
+`+`                 ==>  quantifieur gourmand (attrape tout élément spécifié à sa gauche, jusqu'à ce qu'il rencontre autre chose);
+`\\w`               ==>  caractère relevant d'un mot;
+`[]`                ==>  le contenu des crochets, une seule fois.
+
+```{r enrichissement-des-donnees}
+
+library(stringr) # On réactive l'extension `stringr`, au cas où nous l'ayons pas fait déjà.
+
+# Test expression régulière.
+
+# test <- "Ceci est une phrase. Les mots que vous lisez forment une deuxième phrase. Pourquoi est-ce que nous écrivons ces mots? Pour pouvoir les compter, diantre!"
+
+# str_count(test, "[[:alpha:]-]+")
+
+tableau_synthese$nbre_car <- str_count(tableau_synthese$texte, pattern = ".")
+tableau_synthese$nbre_mots <- str_count(tableau_synthese$texte, pattern = "[[:alpha:]-]+")
 tableau_synthese$nbre_phrases <- str_count(tableau_synthese$texte, pattern = "\\w+[.?!]")
 
-# Les mêmes opérations peuvent être faites en R-base, mais il faut alors combiner quelques fonctions:
-# sapply(regmatches(tableau_synthese$texte, gregexpr("[[:alpha:]]+", tableau_synthese$texte)), length)
-# sapply(regmatches(tableau_synthese$texte, gregexpr("\\w+[.?!]", tableau_synthese$texte)), length)
+tableau_synthese$genre <- factor(c("nouvelles", "roman", "roman", "essai"))
+
+
+# Équivalent en R-base (pour compter le nombre de caractères d'un vecteur):
+# compter_motif_fun <- function(x=tableau_synthese$texte, y=".") {
+#   sapply(regmatches(x, gregexpr(y, x)), length)
+# }
+# compter_motif_fun(x=test, y=".")
+# str_count(test, pattern = ".")
 
 str(tableau_synthese)
 ```
 
+## Visualisation des résultats
+Nous pouvons maintenant transposer le résultat dans une série de graphiques. R possède, dans l'extension de base, une fonction qui permet de faire facilement des graphiques (`plot()`), mais ceux-ci sont primaires. On recourt généralement à l'extension `ggplot2`, de la famille `tidyverse`, pour produire des graphiques plus complexes et attrayants.
 
-Et transposons le résultat en deux différents graphiques.
+Notre tableau est formé de variables catégorielles de type nominale (auteur, titre, genre) et de valeurs numériques de type discrètes (nbre_caracteres, etc.). On peut certes transposer des données catégorielles dans un graphique (à l'aide de couleurs, de tailles de caractères, etc.), mais il est plus aisé de composer avec des valeurs numériques.
+
+Comme nous avons fait différents calculs à partir des textes, nous allons pouvoir composer un jeu de données qui les exclut, cela allègera d'autant la manipulation de la structure. On ne supprime pas la première structure, on la reproduit sans la volumineuse variable `texte`.
 ```{r visualisation}
 library(reshape2)
 library(ggplot2)
-# Et un simple tableau pour visualiser le résultat
-tableau_pour_graphique <- tableau_synthese[, c(1,3:4)] # La colonne de texte n'est pas utile pour la construction du graphique
 
-ggplot(tableau_pour_graphique, aes(x = reorder(titre, nbre_mots), y = nbre_phrases, size = nbre_mots)) +
+tableau_pour_graphique <- tableau_synthese[, -3] # Création d'un tableau pour graphique sans la variable `texte`
+
+str(tableau_pour_graphique)
+
+# Le premier graphique utilise le nombre de phrases sur l'axe y et donne à voir le nombre de mots (taille des points) et l'auteur (couleur)
+ggplot(tableau_pour_graphique, aes(x = reorder(titre, nbre_phrases), 
+                                   y = nbre_phrases, 
+                                   size = nbre_mots, 
+                                   color = auteur)) +
   geom_point(stat = "identity")+
   xlab("Titres")+
   ylab("Nombre de phrases")
 
-tableau_pour_graphique_barres <- melt(tableau_synthese[, c(1,3:4)], id.vars="titre")
+# Pour utiliser un graphique à barres, il faut modifier la structure du tableau et ramener l'ensemble des valeurs numériques dans une seule colonne.
+tableau_pour_graphique_barres <- melt(tableau_pour_graphique, id.vars=c("auteur", "titre", "genre"))
 
-ggplot(tableau_pour_graphique_barres, aes(x=reorder(titre, value), y=value, fill= variable))+
+ggplot(tableau_pour_graphique_barres, aes(x=reorder(titre, value), y=value, fill= auteur))+
   geom_bar(stat="identity") +
   facet_wrap(~ variable,scales = "free_x") +
   xlab("Titres") +
   ylab("Valeurs") +
   coord_flip()
+
+# Vous pouvez essayer de remplacer la valeur de "fill" avec les autres valeurs catégorielles (`titre`, `genre`)
 ```
 # Suppléments à l'atelier
 
