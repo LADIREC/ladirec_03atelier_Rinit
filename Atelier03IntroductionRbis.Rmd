@@ -239,7 +239,7 @@ tableau_synthese <- rbind(tableau_synthese, enfancesCelebres_df)
 str(tableau_synthese)
 
 # Nettoyage de l'environnement de travail.
-rm(list=setdiff(ls(),c("tableau_synthese" )))
+rm(list=setdiff(ls(),c("tableau_synthese", "mes_oeuvres_df")))
 
 # La fonction `gc()` permet de nettoyer la mémoire.
 gc()
