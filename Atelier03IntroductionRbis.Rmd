@@ -16,8 +16,9 @@ knit: (function(inputFile, encoding) {
 ```{r parametres, include=FALSE, message=FALSE, warning=FALSE}
 setwd("/cloud/project")
 if(!"gutenbergr" %in% rownames(installed.packages())) {install.packages("gutenbergr")}
+if(!"rmdformats" %in% rownames(installed.packages())) {install.packages("rmdformats")}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
-extensions = c("knitr", "ggplot2", "dplyr", "stringr", "gutenbergr", "reshape2")
+extensions = c("knitr", "ggplot2", "dplyr", "rmdformats", "stringr", "gutenbergr", "reshape2")
 lapply(extensions, require, character.only = TRUE)
 rm(extensions)
 ```
