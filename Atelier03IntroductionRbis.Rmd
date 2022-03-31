@@ -220,6 +220,10 @@ library(stringr)
 tableau_synthese$nbre_mots <- str_count(tableau_synthese$texte, pattern = "[[:alpha:]]+")
 tableau_synthese$nbre_phrases <- str_count(tableau_synthese$texte, pattern = "\\w+[.?!]")
 
+# Les mêmes opérations peuvent être faites en R-base, mais il faut alors combiner quelques fonctions:
+# sapply(regmatches(tableau_synthese$texte, gregexpr("[[:alpha:]]+", tableau_synthese$texte)), length)
+# sapply(regmatches(tableau_synthese$texte, gregexpr("\\w+[.?!]", tableau_synthese$texte)), length)
+
 str(tableau_synthese)
 ```
 
