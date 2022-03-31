@@ -116,6 +116,7 @@ rownames(mes_oeuvres_df) # actuels noms de lignes
 
 rownames(mes_oeuvres_df) <- paste(mes_oeuvres_df$annee, gsub("\\s", "_", mes_oeuvres_df$oeuvre), sep = "_")
 
+mes_oeuvres_df
 ```
 
 
@@ -246,7 +247,7 @@ ggplot(tableau_pour_graphique_barres, aes(x=reorder(titre, value), y=value, fill
   geom_bar(stat="identity") +
   facet_wrap(~ variable,scales = "free_x") +
   xlab("Titres") +
-  ylab("Valeur") +
+  ylab("Valeurs") +
   coord_flip()
 ```
 # Suppléments à l'atelier
