@@ -155,10 +155,13 @@ mes_oeuvres_df$oeuvre[1:2] <- c("Kamouraska", "L'écho bouge beau")
 mes_oeuvres_df
 ```
 
-Enfin, l'ajout d'une nouvelle colonne repose sur le même principe:
+Pour ajouter une colonne au tableau, on crée un vecteur et on l'ajoute au tableau à l'aide de la fonction `cbind()`. On peut imposer un nouvel ordre aux colonnes en insérant, en position `j` de l'indexation, un vecteur composé des numéros de colonnes.
 
 ```{r ajout-colonne}
-mes_oeuvres_df$initiales_auteur <- c("AH","NB", "JB", "MD")
+
+initiales_auteur <- c("AH","NB", "JB", "MD")
+
+mes_oeuvres_df <- cbind(mes_oeuvres_df, initiales_auteur)
 
 mes_oeuvres_df <- mes_oeuvres_df[, c(1, 6, 2:5)] # Repositionnement de cette colonne dans le tableau
 
