@@ -249,11 +249,11 @@ gc()
 
 Pour rendre la manipulation des données du tableau plus amusante, nous allons y ajouter quatre nouvelles colonnes. Trois d'entre elles contiendront des données numériques et la dernière sera de type catégoriel.
 
-La première colonne à ajouter indiquera, pour chaque roman, le nombre de caractères (y compris le nombre d'espaces); la deuxième, le nombre de mots; la troisième, le nombre de phrases; la quatrième, le genre de l'ouvrage (roman/essai). Les données catégorielles demanderaient un développement en soi. Disons pour aller vite que ce sont des données qui se présentent au programmeur comme des chaînes de caractères, mais R les appréhende sous la forme de nombres entiers. On donne cette structure à la donnée lorsque sa variété est limitée et répétitive. La fonction utilisée pour créer un tel type de données est `factor()` et la transformation de chaînes de caractères en données catégorielles passe par la fonction `as.factor()`. On verra ci-dessous, une fois les données créées, l'implication de cette transformation.
+La première colonne à ajouter indiquera, pour chaque roman, le nombre de caractères (y compris le nombre d'espaces); la deuxième, le nombre de mots; la troisième, le nombre de phrases; la quatrième, le genre de l'ouvrage (roman/essai/nouvelle). Les données catégorielles demanderaient un développement en soi. Disons pour aller vite que ce sont des données qui se présentent au programmeur comme des chaînes de caractères, mais R les appréhende sous la forme de nombres entiers. On donne cette structure à la donnée lorsque sa variété est limitée et répétitive. La fonction utilisée pour créer un tel type de données est `factor()` et la transformation de chaînes de caractères en données catégorielles passe par la fonction `as.factor()`. On verra ci-dessous, une fois les données créées, l'implication de cette transformation.
 
-Pour créer les trois premières colonnes, nous allons recourir l'extension `stringr` et à sa fonction `str_count()`. La même opération peut être faite en utilisant les fonctions de base de R (voir ci-dessous), mais comme il en faut pas moins de quatre pour arriver au même résultat, et qu'il faudrait avoir expliqué les structures de contrôle pour bien comprendre l'opération, nous allons prendre le raccourci appelé `stringr`!
+Pour créer les trois premières colonnes, nous allons recourir à l'extension `stringr` et à sa fonction `str_count()`. La même opération peut être faite en utilisant les fonctions de base de R (voir ci-dessous), mais comme il en faut pas moins de quatre pour arriver au même résultat, et qu'il faudrait avoir expliqué les structures de contrôle pour bien comprendre l'opération, nous allons prendre le raccourci appelé `stringr`!
 
-La fonction `str_count()` fonctionne avec des motifs argument `pattern`) et nous allons donc pouvoir utiliser des expressions régulières pour calculer le nombre de caractères, le nombre de mots et le nombre de phrases.
+La fonction `str_count()` fonctionne avec des motifs (argument `pattern`) et nous allons donc pouvoir utiliser des expressions régulières pour calculer le nombre de caractères, le nombre de mots et le nombre de phrases.
 
 Les expressions régulières utilisées sont les suivantes:
 `.`                 ==>  tout(lettre, chiffre, ponctuation, espace), une seule fois;
@@ -264,7 +264,7 @@ Les expressions régulières utilisées sont les suivantes:
 
 ```{r enrichissement-des-donnees}
 
-library(stringr) # On réactive l'extension `stringr`, au cas où nous l'ayons pas fait déjà.
+library(stringr) # On réactive l'extension `stringr`, au cas où nous ne l'ayons pas fait déjà.
 
 # Test expression régulière.
 
@@ -294,7 +294,7 @@ Nous pouvons maintenant transposer le résultat dans une série de graphiques. R
 
 Notre tableau est formé de variables catégorielles de type nominal (auteur, titre, genre) et de valeurs numériques de type discrètes (nbre_caracteres, etc.). On peut certes transposer des données catégorielles dans un graphique (à l'aide de couleurs, de tailles de caractères, etc.), mais il est plus aisé de composer avec des valeurs numériques.
 
-Comme nous avons fait différents calculs à partir des textes, nous allons pouvoir composer un jeu de données qui les exclut, cela allègera d'autant la manipulation de la structure. On ne supprime pas la première structure, on la reproduit sans la volumineuse variable `texte`.
+Comme nous avons fait différents calculs à partir des textes, nous allons pouvoir composer un jeu de données qui les exclut, cela allégera d'autant la manipulation de la structure. On ne supprime pas la première structure, on la reproduit sans la volumineuse variable `texte`.
 ```{r visualisation}
 library(reshape2)
 library(ggplot2)
